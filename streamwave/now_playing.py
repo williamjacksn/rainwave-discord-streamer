@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import json
-import websockets
+import websockets.exceptions
 import signal
 from discord import Activity, ActivityType
 
@@ -35,10 +35,19 @@ class NowPlaying:
         )
         return result[:MAX_LENGTH]
 
+    async def repeat(self):
+        while True:
+            try:
+                await self.start()
+            except websockets.exceptions.ConnectionClosedError as e:
+                log.error(f"Rainwave API connection closed for sid {self.sid}, reconnecting...")
+                await self.close()
+                continue
+
     # Function to be run in its own thread so that each bot can update its own status to the currently playing song, album, and artist
     async def start(self):
         try:
-            log.debug("Connecting to Rainwave API")
+            log.debug(f"Connecting to Rainwave API for sid {self.sid}")
             ws = await websockets.connect(f"{self.rainwave_api_url}{self.sid}")
             self.ws = ws
         except Exception as err:
@@ -60,7 +69,7 @@ class NowPlaying:
             data = json.loads(message)
             if "sched_current" in data:
                 formatted_song = self.format_song(data["sched_current"])
-                log.debug(f"Updating song: {formatted_song}")
+                log.debug(f"Updating song [sid {self.sid}]: {formatted_song}")
                 now_play = Activity(type=ActivityType.listening, name=formatted_song,)
                 if self.client.ws:
                     await self.client.change_presence(activity=now_play)
