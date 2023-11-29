@@ -43,6 +43,10 @@ class NowPlaying:
                 log.error(f"Rainwave API connection closed for sid {self.sid}, reconnecting...")
                 await self.close()
                 continue
+            except websockets.exceptions.InvalidStatusCode as e:
+                log.error(f"Rainwave API returned invalid status code for sid {self.sid}, reconnecting...")
+                await self.close()
+                continue
 
     # Function to be run in its own thread so that each bot can update its own status to the currently playing song, album, and artist
     async def start(self):
