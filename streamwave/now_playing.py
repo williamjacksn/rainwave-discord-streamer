@@ -35,58 +35,45 @@ class NowPlaying:
         )
         return result[:MAX_LENGTH]
 
-    async def repeat(self):
-        while True:
-            try:
-                await self.start()
-            except websockets.exceptions.ConnectionClosedError as e:
-                log.error(f"Rainwave API connection closed for sid {self.sid}, reconnecting...")
-                await self.close()
-                continue
-            except websockets.exceptions.InvalidStatusCode as e:
-                log.error(f"Rainwave API returned invalid status code for sid {self.sid}, reconnecting...")
-                await self.close()
-                continue
-
     # Function to be run in its own thread so that each bot can update its own status to the currently playing song, album, and artist
     async def start(self):
-        try:
-            log.debug(f"Connecting to Rainwave API for sid {self.sid}")
-            ws = await websockets.connect(f"{self.rainwave_api_url}{self.sid}")
-            self.ws = ws
-        except Exception as err:
-            log.error(f"Error connecting to Rainwave: {err}")
-            raise
-
-        log.debug("Authorizing with Rainwave API")
-        await ws.send(
-            json.dumps(
-                {
-                    "action": "auth",
-                    "user_id": self.rainwave_user_id,
-                    "key": self.rainwave_api_key,
-                }
-            )
-        )
-
-        async for message in ws:
-            data = json.loads(message)
-            if "sched_current" in data:
-                formatted_song = self.format_song(data["sched_current"])
-                log.debug(f"Updating song [sid {self.sid}]: {formatted_song}")
-                now_play = Activity(type=ActivityType.listening, name=formatted_song,)
-                if self.client.ws:
-                    await self.client.change_presence(activity=now_play)
-            if "wserror" in data:
-                log.error(f"Failed validation to Rainwave API. {message}")
-                raise RuntimeError("Bad user ID/API key")
-            if "wsok" in data:
-                log.info("Connected to Rainwave API.")
+        log.debug(f"Connecting to Rainwave API for sid {self.sid}")
+        async for ws in websockets.connect(f"{self.rainwave_api_url}{self.sid}"):
+            try:
+                self.ws = ws
+                log.debug("Authorizing with Rainwave API")
                 await ws.send(
-                    json.dumps({"action": "check_sched_current_id", "sched_id": 1,})
+                    json.dumps(
+                        {
+                            "action": "auth",
+                            "user_id": self.rainwave_user_id,
+                            "key": self.rainwave_api_key,
+                        }
+                    )
                 )
-            if "error" in data:
-                log.error(message)
+
+                async for message in ws:
+                    data = json.loads(message)
+                    if "sched_current" in data:
+                        formatted_song = self.format_song(data["sched_current"])
+                        log.debug(f"Updating song [sid {self.sid}]: {formatted_song}")
+                        now_play = Activity(type=ActivityType.listening, name=formatted_song,)
+                        if self.client.ws:
+                            await self.client.change_presence(activity=now_play)
+                    if "wserror" in data:
+                        log.error(f"Failed validation to Rainwave API. {message}")
+                        raise RuntimeError("Bad user ID/API key")
+                    if "wsok" in data:
+                        log.info("Connected to Rainwave API.")
+                        await ws.send(
+                            json.dumps({"action": "check_sched_current_id", "sched_id": 1,})
+                        )
+                    if "error" in data:
+                        log.error(message)
+
+            except websockets.ConnectionClosed as err:
+                log.error(f"Error connecting to Rainwave: {err}")
+                continue
 
     async def close(self):
         if self.ws:

@@ -41,7 +41,7 @@ try:
         )
         now_playings.append(now_playing)
         loop.create_task(client.start(client.settings.discord_token))
-        loop.create_task(now_playing.repeat())
+        loop.create_task(now_playing.start())
     loop.run_forever()
 except KeyboardInterrupt:
     for client in clients:
