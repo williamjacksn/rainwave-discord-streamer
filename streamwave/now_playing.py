@@ -74,6 +74,9 @@ class NowPlaying:
             except websockets.ConnectionClosed as err:
                 log.error(f"Error connecting to Rainwave: {err}")
                 continue
+            except ConnectionResetError as err:
+                log.error(f"Connection reset: {err}")
+                continue
 
     async def close(self):
         if self.ws:
