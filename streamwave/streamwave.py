@@ -1,19 +1,18 @@
 import discord
 import logging
 
-from .settings_class import StationSettings
+from . import StationSettings
 
 log = logging.getLogger(__name__)
 
 
 class Streamwave(discord.Client):
     settings: StationSettings
-    audio_source: discord.FFmpegOpusAudio
+    audio_source: discord.FFmpegOpusAudio = None
 
-    def __init__(self, settings: StationSettings, *args, **kwargs) -> None:
-        super().__init__(intents=discord.Intents.default(), *args, **kwargs)
+    def __init__(self, settings: StationSettings, **kwargs) -> None:
+        super().__init__(intents=discord.Intents.default(), **kwargs)
         self.settings = settings
-        self.audio_source = None
 
     async def streamwave_start(self, channel) -> None:
         log.debug(f"Streaming to {self.settings.audio_channel}")
@@ -24,6 +23,7 @@ class Streamwave(discord.Client):
         vc.play(self.audio_source)
 
     async def streamwave_stop(self, channel) -> None:
+        v: discord.VoiceClient
         for v in self.voice_clients:
             if v.channel.id == channel.id:
                 log.debug(f"Stopping streaming to {self.settings.audio_channel}")
@@ -32,11 +32,12 @@ class Streamwave(discord.Client):
                     self.audio_source.cleanup()
                 await v.disconnect()
 
-    async def logout(self) -> None:
+    async def close(self) -> None:
+        v: discord.VoiceClient
         for v in self.voice_clients:
             v.stop()
             await v.disconnect()
-        await super().logout()
+        await super().close()
 
     async def on_ready(self) -> None:
         # check to see if anyone's listening after we've started
@@ -81,6 +82,8 @@ class Streamwave(discord.Client):
             and voice_state.channel
             and voice_state.channel.id == self.settings.audio_channel
         ]
+
+        v: discord.VoiceClient
 
         # if we're the only ones left, disconnect
         if len(listeners) == 0:

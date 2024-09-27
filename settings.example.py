@@ -1,4 +1,4 @@
-from streamwave.settings_class import StationSettings
+from streamwave import StationSettings
 
 rainwave_api_url = "ws://core.rainwave.cc/api4/websocket/"
 rainwave_user_id = 0
