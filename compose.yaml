@@ -1,0 +1,9 @@
+services:
+  shell:
+    entrypoint:
+      - /bin/bash
+    image: ghcr.io/williamjacksn/rainwave-discord-streamer
+    init: true
+    volumes:
+      - ./:/home/python/rainwave-discord-streamer
+    working_dir: /home/python/rainwave-discord-streamer
