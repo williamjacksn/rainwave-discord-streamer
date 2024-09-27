@@ -1,13 +1,9 @@
-#!/usr/bin/env python
-
 import asyncio
 import logging
 import typing
 
-from discord import FFmpegPCMAudio as ffmpeg
-from discord.ext import commands
-
 import settings
+
 from streamwave.logging import RWFormatter
 from streamwave.streamwave import Streamwave
 from streamwave.now_playing import NowPlaying
