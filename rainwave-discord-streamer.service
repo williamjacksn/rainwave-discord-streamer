@@ -4,10 +4,10 @@ Wants=network.target
 
 [Service]
 Type=simple
-User=rmcauley
+User=william
 Group=users
-WorkingDirectory=/home/rmcauley/rainwave-discord-streamer
-ExecStart=/usr/bin/env pipenv run ./start.py
+WorkingDirectory=/opt/rainwave-discord-streamer
+ExecStart=/opt/venv/rainwave-discord-streamer-3.12/bin/python /opt/rainwave-discord-streamer/start.py
 
 [Install]
 WantedBy=multi-user.target
