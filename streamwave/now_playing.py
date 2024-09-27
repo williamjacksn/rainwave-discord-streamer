@@ -1,8 +1,7 @@
-import asyncio
-import logging
 import json
+import logging
 import websockets.exceptions
-import signal
+
 from discord import Activity, ActivityType
 
 MAX_LENGTH = 127

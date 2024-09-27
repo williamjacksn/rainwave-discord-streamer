@@ -1,8 +1,5 @@
-import asyncio
-import logging
-from urllib.parse import urlparse
-
 import discord
+import logging
 
 from .settings_class import StationSettings
 
