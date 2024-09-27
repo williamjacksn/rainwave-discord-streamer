@@ -4,8 +4,9 @@ import websockets.asyncio.client
 
 from discord import Activity, ActivityType
 
+log = logging.getLogger(__name__)
+
 MAX_LENGTH = 127
-log = logging.getLogger("streamwave")
 
 
 class NowPlaying:

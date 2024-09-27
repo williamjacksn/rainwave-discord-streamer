@@ -1,31 +1,22 @@
 import asyncio
-import logging
-import typing
+import notch
 
 import settings
 
-from streamwave.logging import RWFormatter
 from streamwave.streamwave import Streamwave
 from streamwave.now_playing import NowPlaying
 
-print_handler = logging.StreamHandler()
-print_handler.setFormatter(RWFormatter())
-print_handler.setLevel(logging.DEBUG)
-
-discord_logger = logging.getLogger("discord")
-discord_logger.setLevel(settings.discord_log_level)
-discord_logger.addHandler(print_handler)
-
-streamwave_logger = logging.getLogger("streamwave")
-streamwave_logger.setLevel(settings.streamwave_log_level)
-streamwave_logger.addHandler(print_handler)
+log = notch.make_log('rainwave-discord-streamer')
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-clients: typing.List[Streamwave] = [
+
+clients: list[Streamwave] = [
     Streamwave(station) for station in settings.stations
 ]
+
 now_playings = []
+
 try:
     for client in clients:
         now_playing = NowPlaying(

@@ -3,7 +3,7 @@ import logging
 
 from .settings_class import StationSettings
 
-log = logging.getLogger("streamwave")
+log = logging.getLogger(__name__)
 
 
 class Streamwave(discord.Client):
