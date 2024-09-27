@@ -1,6 +1,6 @@
 import json
 import logging
-import websockets.exceptions
+import websockets.asyncio.client
 
 from discord import Activity, ActivityType
 
@@ -37,7 +37,7 @@ class NowPlaying:
     # Function to be run in its own thread so that each bot can update its own status to the currently playing song, album, and artist
     async def start(self):
         log.debug(f"Connecting to Rainwave API for sid {self.sid}")
-        async for ws in websockets.connect(f"{self.rainwave_api_url}{self.sid}"):
+        async for ws in websockets.asyncio.client.connect(f"{self.rainwave_api_url}{self.sid}"):
             try:
                 self.ws = ws
                 log.debug("Authorizing with Rainwave API")
