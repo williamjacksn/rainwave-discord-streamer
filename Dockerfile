@@ -6,7 +6,7 @@ USER python
 RUN /usr/local/bin/python -m venv /home/python/venv
 
 COPY --chown=python:python requirements.txt /home/python/rainwave-discord-streamer/requirements.txt
-RUN /home/python/venv/bin/python -m pip install --no-cache-dir --update pip
+RUN /home/python/venv/bin/python -m pip install --no-cache-dir --upgrade pip
 RUN /home/python/venv/bin/pip install --no-cache-dir pip-tools
 RUN /home/python/venv/bin/pip install --no-cache-dir --requirement /home/python/rainwave-discord-streamer/requirements.txt
 
