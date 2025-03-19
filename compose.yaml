@@ -1,4 +1,13 @@
 services:
+  pip-compile:
+    entrypoint:
+      - /home/python/venv/bin/pip-compile
+    image: ghcr.io/williamjacksn/pip-tools:py3.12
+    init: true
+    volumes:
+      - ./:/home/python/rainwave-discord-streamer
+    working_dir: /home/python/rainwave-discord-streamer
+
   shell:
     entrypoint:
       - /bin/bash
