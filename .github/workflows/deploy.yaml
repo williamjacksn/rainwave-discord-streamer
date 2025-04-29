@@ -19,8 +19,5 @@ jobs:
       - name: Pull changes on remote server
         run: ssh ssh://${{ secrets.ssh_user }}@${{ secrets.ssh_host }}:2234 git -C /opt/rainwave-discord-streamer pull
 
-      - name: Ensure requirements are installed
-        run: ssh ssh://${{ secrets.ssh_user }}@${{ secrets.ssh_host }}:2234 /opt/venv/rainwave-discord-streamer-3.12/bin/pip-sync /opt/rainwave-discord-streamer/requirements.txt
-
       - name: Restart app
         run: ssh ssh://${{ secrets.ssh_user }}@${{ secrets.ssh_host }}:2234 sudo systemctl restart rainwave-discord-streamer.service
