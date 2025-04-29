@@ -11,9 +11,7 @@ notch.configure()
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
-clients: list[Streamwave] = [
-    Streamwave(station) for station in settings.stations
-]
+clients: list[Streamwave] = [Streamwave(station) for station in settings.stations]
 
 now_playings = []
 
