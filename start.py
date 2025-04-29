@@ -6,7 +6,7 @@ import settings
 from streamwave.streamwave import Streamwave
 from streamwave.now_playing import NowPlaying
 
-log = notch.make_log('rainwave-discord-streamer')
+notch.configure()
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
