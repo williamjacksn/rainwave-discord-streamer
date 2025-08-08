@@ -6,8 +6,8 @@ Wants=network.target
 Type=simple
 User=william
 Group=users
-WorkingDirectory=/opt/rainwave-discord-streamer
-ExecStart=/home/william/.local/bin/uv run start.py
+WorkingDirectory=/home/rainwave/rainwave-discord-streamer
+ExecStart=/home/rainwave/.local/bin/uv run /home/rainwave/rainwave-discord-streamer/start.py
 
 [Install]
 WantedBy=multi-user.target
