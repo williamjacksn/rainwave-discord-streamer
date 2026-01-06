@@ -1,5 +1,6 @@
-import discord
 import logging
+
+import discord
 
 from . import StationSettings
 

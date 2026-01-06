@@ -1,10 +1,10 @@
 import asyncio
+
 import notch
 
 import settings
-
-from streamwave.streamwave import Streamwave
 from streamwave.now_playing import NowPlaying
+from streamwave.streamwave import Streamwave
 
 notch.configure()
 
