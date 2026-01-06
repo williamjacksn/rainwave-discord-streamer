@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import discord
@@ -9,13 +10,14 @@ log = logging.getLogger(__name__)
 
 class Streamwave(discord.Client):
     settings: StationSettings
-    audio_source: discord.FFmpegOpusAudio = None
+    audio_source: discord.FFmpegOpusAudio
+    task: asyncio.Task
 
-    def __init__(self, settings: StationSettings, **kwargs) -> None:
-        super().__init__(intents=discord.Intents.default(), **kwargs)
+    def __init__(self, settings: StationSettings) -> None:
+        super().__init__(intents=discord.Intents.default())
         self.settings = settings
 
-    async def streamwave_start(self, channel) -> None:
+    async def streamwave_start(self, channel: discord.VoiceChannel) -> None:
         log.debug(f"Streaming to {self.settings.audio_channel}")
         source = self.settings.audio_source
         vc = await channel.connect()
@@ -23,10 +25,9 @@ class Streamwave(discord.Client):
         self.audio_source = await discord.FFmpegOpusAudio.from_probe(source)
         vc.play(self.audio_source)
 
-    async def streamwave_stop(self, channel) -> None:
-        v: discord.VoiceClient
+    async def streamwave_stop(self, channel: discord.VoiceChannel) -> None:
         for v in self.voice_clients:
-            if v.channel.id == channel.id:
+            if isinstance(v, discord.VoiceClient) and v.channel.id == channel.id:
                 log.debug(f"Stopping streaming to {self.settings.audio_channel}")
                 v.stop()
                 if self.audio_source:
@@ -34,16 +35,16 @@ class Streamwave(discord.Client):
                 await v.disconnect()
 
     async def close(self) -> None:
-        v: discord.VoiceClient
         for v in self.voice_clients:
-            v.stop()
-            await v.disconnect()
+            if isinstance(v, discord.VoiceClient):
+                v.stop()
+                await v.disconnect()
         await super().close()
 
     async def on_ready(self) -> None:
         # check to see if anyone's listening after we've started
         channel = self.get_channel(self.settings.audio_channel)
-        if len(channel.voice_states) > 0:
+        if isinstance(channel, discord.VoiceChannel) and len(channel.voice_states) > 0:
             log.info(
                 f"Start-up check: Listeners waiting on {self.settings.audio_channel}"
             )
@@ -51,21 +52,29 @@ class Streamwave(discord.Client):
         else:
             log.info(f"Start-up check: Nobody waiting on {self.settings.audio_channel}")
 
-    async def on_voice_state_update(self, member, before, after) -> None:
+    async def on_voice_state_update(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ) -> None:
         channel = None
 
-        # on_voice_state_update will fire every time the voice state of the server changes.
-        # this includes people being muted in the same channel.
-        # so doing str(after) != str(before) filters it down to just when people have changed channels
-        # this if statement works because getting the string of the after and before states returns just the name of the channels.
+        # on_voice_state_update will fire every time the voice state of the server
+        # changes. This includes people being muted in the same channel. So doing
+        # str(after) != str(before) filters it down to just when people have
+        # changed channels. This if statement works because getting the string of the
+        # fter and before states returns just the name of the channels.
         if str(after) != str(before):
-            # after.channel will be None if someone is disconnecting, populated if switching or connecting
+            # after.channel will be None if someone is disconnecting,
+            # populated if switching or connecting
             if (
                 after.channel is not None
                 and after.channel.id == self.settings.audio_channel
             ):
                 channel = after.channel
-            # before.channel will be None if someone is connecting for first time, populated if they are coming from a different channel
+            # before.channel will be None if someone is connecting for first time,
+            # populated if they are coming from a different channel
             elif (
                 before.channel is not None
                 and before.channel.id == self.settings.audio_channel
@@ -75,20 +84,25 @@ class Streamwave(discord.Client):
         if not channel:
             return
 
-        # Filter out ourselves from the member list, and anyone else's voice status that's from another channel
+        # Filter out ourselves from the member list, and anyone else's voice status
+        # that's from another channel
         listeners = [
             member_id
             for member_id, voice_state in channel.voice_states.items()
-            if member_id != self.user.id
+            if isinstance(self.user, discord.ClientUser)
+            and member_id != self.user.id
             and voice_state.channel
             and voice_state.channel.id == self.settings.audio_channel
         ]
 
-        v: discord.VoiceClient
-
         # if we're the only ones left, disconnect
-        if len(listeners) == 0:
+        if len(listeners) == 0 and isinstance(channel, discord.VoiceChannel):
+            log.info(f"No one left listening on {channel.name}, disconnecting")
             await self.streamwave_stop(channel)
         # if we don't have this channel ID in our voice client list, connect
-        elif not next((v.channel.id for v in self.voice_clients), None):
+        elif (
+            isinstance(channel, discord.VoiceChannel)
+            and channel not in self.voice_clients
+        ):
+            log.info(f"New listener on {channel.name}, connecting")
             await self.streamwave_start(channel)

@@ -6,13 +6,13 @@ rainwave_api_key = "aaaaaaaaaaa"
 
 stations: list[StationSettings] = [
     StationSettings(
-        discord_token="MY_NAME_IS_ALL",
+        discord_token="",  # add your bot's Discord token here
         audio_source="https://relay.rainwave.cc/all.ogg",
         audio_channel=1234567890,
         sid=5,
     ),
     StationSettings(
-        discord_token="MY_NAME_IS_GAME",
+        discord_token="",  # add your bot's Discord token here
         audio_source="https://relay.rainwave.cc/game.ogg",
         audio_channel=987654321,
         sid=1,
