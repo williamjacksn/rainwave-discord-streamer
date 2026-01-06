@@ -9,3 +9,9 @@ dependencies = [
     "notch>=2025.2",
     "websockets>=15.0.1",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.10",
+    "ty>=0.0.9",
+]
