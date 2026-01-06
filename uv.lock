@@ -590,7 +590,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "discord-py", extras = ["voice"], specifier = ">=2.5.2" },
+    { name = "discord-py", extras = ["voice"], specifier = ">=2.6.4" },
     { name = "notch", specifier = ">=2025.2" },
     { name = "websockets", specifier = ">=15.0.1" },
 ]
