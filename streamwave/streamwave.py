@@ -100,9 +100,10 @@ class Streamwave(discord.Client):
             log.info(f"No one left listening on {channel.name}, disconnecting")
             await self.streamwave_stop(channel)
         # if we don't have this channel ID in our voice client list, connect
-        elif (
-            isinstance(channel, discord.VoiceChannel)
-            and channel not in self.voice_clients
-        ):
+        elif isinstance(channel, discord.VoiceChannel) and channel.id not in [
+            v.channel.id
+            for v in self.voice_clients
+            if isinstance(v, discord.VoiceClient)
+        ]:
             log.info(f"New listener on {channel.name}, connecting")
             await self.streamwave_start(channel)
