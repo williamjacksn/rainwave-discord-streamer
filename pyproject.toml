@@ -3,7 +3,7 @@ name = "rainwave-discord-streamer"
 version = "2025.0"
 description = "Stream Rainwave radio to Discord"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "discord-py[voice]>=2.6.4",
     "notch>=2025.2",
